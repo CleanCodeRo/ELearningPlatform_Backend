@@ -5,12 +5,17 @@ package cleancode.eLearningPlatform.auth.service;
 import cleancode.eLearningPlatform.auth.model.*;
 import cleancode.eLearningPlatform.auth.repository.UserRepository;
 import cleancode.eLearningPlatform.config.JWTService;
+import cleancode.eLearningPlatform.modulesAndLessons.model.Lesson;
 import cleancode.eLearningPlatform.modulesAndLessons.model.Status;
+import cleancode.eLearningPlatform.modulesAndLessons.repository.LessonRepository;
+import cleancode.eLearningPlatform.modulesAndLessons.service.LessonService;
+import cleancode.eLearningPlatform.specialKatas.model.Kata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLOutput;
 import java.util.List;
@@ -21,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final LessonService lessonService;
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
@@ -67,17 +73,20 @@ public class UserService {
         return user;
     }
 
+    @Transactional
     public String addOrRemoveLessonFromUser(Long userId, Integer lessonId, Status status) {
         Optional<User> optionalUser = userRepository.findById(userId);
+        Lesson lesson = lessonService.findLessonById(lessonId);
         System.out.println(status + " " + userId + " " + lessonId);
+
+
 
         if(optionalUser.isPresent()){
             if(status.equals(Status.DONE)){
-                optionalUser.get().getCompletedLessons().add(lessonId);
-                System.out.println( optionalUser.get().toString());
+                optionalUser.get().getCompletedLessons().add(lesson);
             }else{
-                optionalUser.get().getCompletedLessons().remove(Integer.valueOf(lessonId));
-                System.out.println( optionalUser.get().toString());
+                System.out.println("reeemoooveee");
+                optionalUser.get().getCompletedLessons().remove(lesson);
             }
 
         }

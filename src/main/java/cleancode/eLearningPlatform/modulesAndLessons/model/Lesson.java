@@ -1,16 +1,18 @@
 package cleancode.eLearningPlatform.modulesAndLessons.model;
 
+import cleancode.eLearningPlatform.auth.model.User;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
 @RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Lesson {
     @Id
     @GeneratedValue
@@ -22,10 +24,14 @@ public class Lesson {
 
     private String gitHubLink;
 
-    @JsonBackReference
+    @JsonBackReference(value = "week")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false)
     private Week week;
+
+    @JsonBackReference(value = "user")
+    @ManyToMany(fetch = FetchType.LAZY,  mappedBy = "completedLessons")
+    private List<User> users;
 
 
 }

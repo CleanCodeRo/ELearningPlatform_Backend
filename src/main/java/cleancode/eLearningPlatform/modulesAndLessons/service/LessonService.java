@@ -6,6 +6,7 @@ import cleancode.eLearningPlatform.modulesAndLessons.model.Week;
 import cleancode.eLearningPlatform.modulesAndLessons.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ public class LessonService {
     return lessonRepository.save(lesson);
     }
 
+    @Transactional
     public String deleteLesson(int lessonId) {
         lessonRepository.deleteById(lessonId);
         return "Deleted Lesson " + lessonId;

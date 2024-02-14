@@ -7,9 +7,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.List;
 
@@ -17,6 +15,8 @@ import java.util.List;
 @Getter
 @Setter
 @RequiredArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Kata {
     @Id
     @GeneratedValue
@@ -38,4 +38,6 @@ public class Kata {
     @CollectionTable(name = "kata_categories", joinColumns = @JoinColumn(name = "kata_id"))
     @Enumerated(EnumType.STRING)
     private List<Category> category;
+
+
 }

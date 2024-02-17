@@ -1,10 +1,15 @@
 package cleancode.eLearningPlatform.modulesAndLessons.service;
 
+import cleancode.eLearningPlatform.auth.model.User;
+import cleancode.eLearningPlatform.auth.repository.UserRepository;
+import cleancode.eLearningPlatform.auth.service.UserService;
 import cleancode.eLearningPlatform.modulesAndLessons.model.Lesson;
 import cleancode.eLearningPlatform.modulesAndLessons.model.Module;
+import cleancode.eLearningPlatform.modulesAndLessons.model.Status;
 import cleancode.eLearningPlatform.modulesAndLessons.model.Week;
 import cleancode.eLearningPlatform.modulesAndLessons.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +21,7 @@ import java.util.Optional;
 public class LessonService {
 
     private final LessonRepository lessonRepository;
+    private final UserRepository userRepository;
     public List<Lesson> findAllLessons() {
         return lessonRepository.findAll();
     }
@@ -33,8 +39,17 @@ public class LessonService {
     }
 
     @Transactional
+    @Modifying
     public String deleteLesson(int lessonId) {
-        lessonRepository.deleteById(lessonId);
+        List<User> users = userRepository.findAll();
+        Lesson deletedLesson = findLessonById(lessonId);
+
+        for (User user : users ) {
+            user.getCompletedLessons().remove(deletedLesson);
+            userRepository.save(user);
+        }
+
+        lessonRepository.delete(deletedLesson);
         return "Deleted Lesson " + lessonId;
     }
     public Lesson updateLesson(int lessonId, Lesson updatedLesson){

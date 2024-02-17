@@ -79,8 +79,6 @@ public class UserService {
         Lesson lesson = lessonService.findLessonById(lessonId);
         System.out.println(status + " " + userId + " " + lessonId);
 
-
-
         if(optionalUser.isPresent()){
             if(status.equals(Status.DONE)){
                 optionalUser.get().getCompletedLessons().add(lesson);
@@ -88,10 +86,10 @@ public class UserService {
                 System.out.println("reeemoooveee");
                 optionalUser.get().getCompletedLessons().remove(lesson);
             }
-
         }
 
         userRepository.save(optionalUser.get());
         return "ok";
     }
+
 }

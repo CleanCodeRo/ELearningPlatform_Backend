@@ -39,14 +39,14 @@ public class JWTService {
     }
 
 
-    public String generateToken(UserDetails userDetails, boolean rememberMe){
-        return generateToken(new HashMap<>(), userDetails, rememberMe);
+    public String generateToken(UserDetails userDetails, int tokenLifespan){
+        return generateToken(new HashMap<>(), userDetails, tokenLifespan);
     }
 
-    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, boolean rememberMe){
+    public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails, int tokenLifespan){
         User user = (User) userDetails;
 
-        long expirationDateTime = !rememberMe ? (1000 * 60 * 60 * 5) : (1000 * 60 * 60 * 24 * 14);
+
         return Jwts
                 .builder()
                 .setClaims(extraClaims)
@@ -56,7 +56,7 @@ public class JWTService {
                 .claim("lastName", user.getLastName())
                 .claim("role",user.getRole())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + expirationDateTime ))
+                .setExpiration(new Date(System.currentTimeMillis() + tokenLifespan ))
                 .signWith(getSignInKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

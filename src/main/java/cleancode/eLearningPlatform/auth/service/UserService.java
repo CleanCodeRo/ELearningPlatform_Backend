@@ -50,7 +50,8 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
-        var jwtToken = jwtService.generateToken(user, false);
+        int tokenLifespan =  1000 * 60 * 60 * 5;
+        var jwtToken = jwtService.generateToken(user, tokenLifespan);
         return AuthenticationResponse.builder().response(jwtToken).build();
     }
 
@@ -61,7 +62,8 @@ public class UserService {
                 authenticationRequest.getPassword()
         ));
         var user = userRepository.findByEmail(authenticationRequest.getEmail()).orElseThrow();
-        var jwtToken = jwtService.generateToken(user, authenticationRequest.isRememberMe());
+        int tokenLifespan = authenticationRequest.isRememberMe() ? (1000 * 60 * 60 * 5) : (1000 * 60 * 60 * 24 * 14);
+        var jwtToken = jwtService.generateToken(user, tokenLifespan);
         return AuthenticationResponse.builder().response(jwtToken).build();
     }
 
@@ -284,5 +286,15 @@ public class UserService {
             userRepository.save(user);
         }
         System.out.println("reseted ");
+    }
+
+    public AuthenticationResponse generateForgotPasswordToken(String email) {
+
+        var user = userRepository.findByEmail(email).orElseThrow();
+
+        var jwtToken = jwtService.generateToken(user, 1000*60*10);
+
+
+        return new AuthenticationResponse(jwtToken);
     }
 }

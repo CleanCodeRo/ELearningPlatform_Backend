@@ -48,6 +48,13 @@ public class UserController {
         return ResponseEntity.ok(userService.authenticate(authenticationRequest));
     }
 
+    @GetMapping("/auth/forgotPassword/{email}")
+    public ResponseEntity<AuthenticationResponse> forgotPassword(@PathVariable String email ){
+        return ResponseEntity.ok(userService.generateForgotPasswordToken(email));
+    }
+
+
+
     @PatchMapping()
     public ResponseEntity<Response> addOrRemoveLessonFromUser(@RequestParam (name = "userId") Long userId, @RequestParam (name = "lessonId") Integer lessonId , @RequestParam (name = "weekId") Integer weekId ,  @RequestBody Status status){
         return ResponseEntity.ok(userService.addOrRemoveLessonFromUser(userId, lessonId,weekId, status));

@@ -33,6 +33,8 @@ public class UserService {
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final ForgotPasswordService forgotPasswordService;
+    private final EmailService emailService;
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
         boolean emailExists = userRepository.existsByEmail(registerRequest.getEmail());
@@ -292,9 +294,21 @@ public class UserService {
 
         var user = userRepository.findByEmail(email).orElseThrow();
 
-        var jwtToken = jwtService.generateToken(user, 1000*60*10);
+        //var jwtToken = jwtService.generateToken(user, 1000*60*10);
+        String oneTimePassword = forgotPasswordService.generateForgotPasswordToken(user,10);
+        String subject = "Password Reset Request";
+        String body = "Dear " + user.getFirstName() +" "+ user.getLastName() + ",\n\n"
+                + "You have requested to reset your password. Your one-time password is: " + oneTimePassword + "\n\n"
+                + "Please use this password to reset your password within the next 10 minutes.\n\n"
+                + "If you did not request this, please ignore this email.\n\n"
+                + "Sincerely,\n"
+                + "CleanCode Team";
+
+        // Send the email
+        emailService.sendEmail(user.getEmail(), subject, body);
+        user.setPassword(oneTimePassword);
 
 
-        return new AuthenticationResponse(jwtToken);
+        return new AuthenticationResponse(oneTimePassword);
     }
 }

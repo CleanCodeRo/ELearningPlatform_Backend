@@ -9,8 +9,8 @@ import java.util.Properties;
 
 @Component
 public class EmailService {
-    private final String username = "bogdandiaconu10@yahoo.com";
-    private final String password = "riziyboudpdttgnz";
+    private final String username = "projectcleancode@gmail.com";
+    private final String password = "vfdb xyof uxyc pkiy";
     private final Properties props;
 
     public EmailService() {
@@ -18,8 +18,9 @@ public class EmailService {
         props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");
-        props.put("mail.smtp.host", "smtp.mail.yahoo.com");
-        props.put("mail.smtp.port", "587");
+        props.put("mail.smtp.host", "smtp.gmail.com");
+        props.put("mail.smtp.port", "587"); // Use port 587 for TLS
+        props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
     }
 
     public void sendEmail(String to, String subject, String body) {

@@ -307,7 +307,7 @@ public class UserService {
         // Send the email
         emailService.sendEmail(user.getEmail(), subject, body);
         user.setPassword(oneTimePassword);
-
+        userRepository.save(user);
 
         return new AuthenticationResponse(oneTimePassword);
     }

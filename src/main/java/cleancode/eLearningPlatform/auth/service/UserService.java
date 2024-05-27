@@ -304,7 +304,7 @@ public class UserService {
         String ten_minutes_token = jwtService.generateToken(user, 1000 * 60 * 10);
 
 //        MUST CHANGE
-        String deploy_link = "https://cleancode-academy.com/reset_CleanCode_password";
+        String deploy_link = "https://quest.cleancode.ro/reset_CleanCode_password";
         String local_link = "http://localhost:5173/reset_CleanCode_password";
         String resetLink = deploy_link + "/" + ten_minutes_token + "/" + user.getId();
 

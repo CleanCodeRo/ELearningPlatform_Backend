@@ -51,8 +51,14 @@ public class UserService {
                 .role(Role.USER)
                 .build();
 
+
+        // must fix the db to remove this
+        user.setRankPoints(0);
+        user.setWeeklyRankPoints(0);
+        // must fix the db to remove this
+
         userRepository.save(user);
-        int tokenLifespan =  1000 * 60 * 60 * 5;
+        int tokenLifespan = 1000 * 60 * 60 * 5;
         var jwtToken = jwtService.generateToken(user, tokenLifespan);
         return AuthenticationResponse.builder().response(jwtToken).build();
     }
@@ -84,85 +90,84 @@ public class UserService {
             return user.getCompletedLessons().contains(lesson.getId());
         }).count();
 
-       // System.out.println(currentLesson.isOptional() + " is OPtionalll ????? ");
+        // System.out.println(currentLesson.isOptional() + " is OPtionalll ????? ");
 
         assert user != null;
         if (status.equals(Status.DONE)) {
             user.getCompletedLessons().add(lessonId);
-                if (completedLessonsBefore + 1 == lessons.size() ) {
-                    System.out.println("ADD WEEK FROM STATUS -> " + weekId);
-                    user.getCompletedWeeks().add(weekId);
-                    checkAndModifyModuleStatus(user, weekId, status);
-                }
-            } else {
-            user.getCompletedLessons().remove(Integer.valueOf(lessonId));
-                if (lessons.size() - completedLessonsBefore == 0  ) {
-                    System.out.println("REMOVE WEEK FROM STATUS -> " + weekId);
-                    user.getCompletedWeeks().remove(Integer.valueOf(weekId));
-                    checkAndModifyModuleStatus(user, weekId, status);
-                }
+            if (completedLessonsBefore + 1 == lessons.size()) {
+                System.out.println("ADD WEEK FROM STATUS -> " + weekId);
+                user.getCompletedWeeks().add(weekId);
+                checkAndModifyModuleStatus(user, weekId, status);
             }
+        } else {
+            user.getCompletedLessons().remove(Integer.valueOf(lessonId));
+            if (lessons.size() - completedLessonsBefore == 0) {
+                System.out.println("REMOVE WEEK FROM STATUS -> " + weekId);
+                user.getCompletedWeeks().remove(Integer.valueOf(weekId));
+                checkAndModifyModuleStatus(user, weekId, status);
+            }
+        }
 
         userRepository.save(user);
         return Response.builder().response("ok").build();
     }
 
-    private void checkAndModifyModuleStatus(User user, int weekId, Status status){
+    private void checkAndModifyModuleStatus(User user, int weekId, Status status) {
         List<Week> restOfWeeks = weekRepository.getRestOfWeeks(weekId);
-        long completedWeeksBefore = restOfWeeks.stream().filter(week -> user.getCompletedWeeks().contains( week.getId())).count();
+        long completedWeeksBefore = restOfWeeks.stream().filter(week -> user.getCompletedWeeks().contains(week.getId())).count();
         int moduleId = weekRepository.getModuleIdFromWeek(weekId);
 
-        if(completedWeeksBefore == restOfWeeks.size()){
+        if (completedWeeksBefore == restOfWeeks.size()) {
             System.out.println("ADD MODULE ---------------------------------------");
             user.getCompletedModules().add(moduleId);
         }
-        if(restOfWeeks.size() - completedWeeksBefore == 1 && status.equals(Status.TODO)){
+        if (restOfWeeks.size() - completedWeeksBefore == 1 && status.equals(Status.TODO)) {
             System.out.println("REMOVE MODULE ----------------------------");
             user.getCompletedModules().remove(Integer.valueOf(moduleId));
         }
     }
 
 
-
-    public final void removeModuleFromAllUsers(Module module, boolean cascadeDelete, List<User> optionalUsers){
+    public final void removeModuleFromAllUsers(Module module, boolean cascadeDelete, List<User> optionalUsers) {
         List<User> users = !optionalUsers.isEmpty() ? optionalUsers : userRepository.findAll();
 
-        if(cascadeDelete){
+        if (cascadeDelete) {
             users.forEach(user -> {
-                module.getWeeks().forEach(week -> removeWeekFromAllUsers(week, true, false ,  users));
+                module.getWeeks().forEach(week -> removeWeekFromAllUsers(week, true, false, users));
                 user.getCompletedModules().remove(Integer.valueOf(module.getId()));
             });
-        }else{
+        } else {
             users.forEach(user -> user.getCompletedModules().remove(Integer.valueOf(module.getId())));
         }
 
     }
 
     @Modifying
-    public final void removeWeekFromAllUsers(Week week, boolean cascadeDelete, boolean removeJustAllWeeksStatus, List<User> optionalUsers){
+    public final void removeWeekFromAllUsers(Week week, boolean cascadeDelete, boolean removeJustAllWeeksStatus, List<User> optionalUsers) {
         List<User> users = !optionalUsers.isEmpty() ? optionalUsers : userRepository.findAll();
 
-        if(removeJustAllWeeksStatus){
+        if (removeJustAllWeeksStatus) {
             // HERE WE ARE REMOVING JUST THE WEEK STATUS, THIS HAPPENS WHEN A NEW LESSON ITS ADDED AND THE WEEK RETURNS TO TODO
             System.out.println("// HERE WE ARE REMOVING JUST THE WEEK STATUS, THIS HAPPENS WHEN A NEW LESSON ITS ADDED AND THE WEEK RETURNS TO TODO");
             users.forEach(user -> user.getCompletedWeeks().remove(Integer.valueOf(week.getId())));
-        }else{
+        } else {
             // HERE WE ARE DELETING THE WHOLE WEEK WITH ALL HER RECORDS
             System.out.println(" // HERE WE ARE DELETING THE WHOLE WEEK WITH ALL HER RECORDS");
             List<Lesson> lessonsOfWeek = weekRepository.getLessonsByWeekId(week.getId());
-            if(cascadeDelete){
+            if (cascadeDelete) {
                 // THIS MEANS THAT A MODULE IS DELETED AND ALL THE WEEKS WILL BE DELETED SO WE WON'T NEED TO CHECK FURTHER STATUS
                 users.forEach(user -> {
-                    lessonsOfWeek.forEach(lesson -> removeLessonFromAllUsers(lesson.getId(), week.getId(),true , users));
+                    lessonsOfWeek.forEach(lesson -> removeLessonFromAllUsers(lesson.getId(), week.getId(), true, users));
                     user.getCompletedWeeks().remove(Integer.valueOf(week.getId()));
 
                 });
-            }else{
+            } else {
                 // THIS MEANS THAT JUST ONE WEEK IS DELETED AND  WE NEED TO CHECK FURTHER STATUS FOR THE MODULE
                 users.forEach(user -> {
-                    lessonsOfWeek.forEach(lesson -> removeLessonFromAllUsers(lesson.getId(), week.getId(),true , users));
+                    lessonsOfWeek.forEach(lesson -> removeLessonFromAllUsers(lesson.getId(), week.getId(), true, users));
                     user.getCompletedWeeks().remove(Integer.valueOf(week.getId()));
-                     modifyModuleStatusAfterWeekDeleteOrAdd(week.getId(), user, Status.TODO);
+                    modifyModuleStatusAfterWeekDeleteOrAdd(week.getId(), user, Status.TODO);
                 });
             }
         }
@@ -171,12 +176,12 @@ public class UserService {
 
 
     @Modifying
-    public final void removeLessonFromAllUsers(Integer lessonId, Integer weekId, boolean cascadeDelete, List<User> optionalUsers){
+    public final void removeLessonFromAllUsers(Integer lessonId, Integer weekId, boolean cascadeDelete, List<User> optionalUsers) {
         List<User> users = !optionalUsers.isEmpty() ? optionalUsers : userRepository.findAll();
 
         System.out.println(users);
 
-        if(cascadeDelete){
+        if (cascadeDelete) {
             System.out.println("DELETING ALL LESSONS FROM USERS");
             users.forEach(user -> user.getCompletedLessons().remove(Integer.valueOf(lessonId)));
         } else {
@@ -195,7 +200,7 @@ public class UserService {
     }
 
 
-    private void modifyWeekStatusAfterLessonDelete(Integer lessonId, Integer weekId, User user){
+    private void modifyWeekStatusAfterLessonDelete(Integer lessonId, Integer weekId, User user) {
         List<Lesson> lessonsOfWeek = weekRepository.getLessonsByWeekId(weekId);
         List<Integer> completedLessons = user.getCompletedLessons();
         long completedLessonsAfter = lessonsOfWeek.stream().filter(lesson -> completedLessons.contains(lesson.getId())).count();
@@ -203,7 +208,7 @@ public class UserService {
         System.out.println("lessonsOfWeek.size() " + lessonsOfWeek.size());
         System.out.println("completedLessonsAfter " + completedLessonsAfter);
 
-        if(lessonsOfWeek.size() == completedLessonsAfter){
+        if (lessonsOfWeek.size() == completedLessonsAfter) {
             user.getCompletedWeeks().add(weekId);
             modifyModuleStatusAfterWeekDeleteOrAdd(weekId, user, Status.DONE);
         }
@@ -211,17 +216,17 @@ public class UserService {
     }
 
 
-    public void modifyModuleStatusAfterWeekDeleteOrAdd( Integer weekId, User user ,Status addOrRemoveWeek){
-       List<Week> weeksOfModule = weekRepository.getRestOfWeeks(weekId);
+    public void modifyModuleStatusAfterWeekDeleteOrAdd(Integer weekId, User user, Status addOrRemoveWeek) {
+        List<Week> weeksOfModule = weekRepository.getRestOfWeeks(weekId);
         System.out.println(weeksOfModule);
         List<Integer> completedWeeks = user.getCompletedWeeks();
         long completedWeeksAfter = weeksOfModule.stream().filter(week -> completedWeeks.contains(week.getId())).count();
 
-        if(addOrRemoveWeek.equals(Status.TODO) && weeksOfModule.size() - completedWeeksAfter == 1){
+        if (addOrRemoveWeek.equals(Status.TODO) && weeksOfModule.size() - completedWeeksAfter == 1) {
             System.out.println("ADD MODULE FROM REMOVE WEEK");
             user.getCompletedModules().add(weekRepository.getModuleIdFromWeek(weekId));
 
-        }else if(addOrRemoveWeek.equals(Status.DONE) && weeksOfModule.size() == completedWeeksAfter){
+        } else if (addOrRemoveWeek.equals(Status.DONE) && weeksOfModule.size() == completedWeeksAfter) {
             System.out.println("ADD MODULE FROM ADD WEEK");
             user.getCompletedModules().add(weekRepository.getModuleIdFromWeek(weekId));
         }
@@ -234,55 +239,59 @@ public class UserService {
         assert user != null;
         return CompletedItemsResponse.builder().completedLessons(user.getCompletedLessons()).completedWeeks(user.getCompletedWeeks()).completedModules(user.getCompletedModules()).build();
     }
-    public List<User>findAllByOrderByRankPoints(){
-    return userRepository.findAllByOrderByRankPointsDesc();
+
+    public List<User> findAllByOrderByRankPoints() {
+        return userRepository.findAllByOrderByRankPointsDesc();
     }
-    public List<User>findAllByOrderByWeeklyRankPoints(){
+
+    public List<User> findAllByOrderByWeeklyRankPoints() {
         return userRepository.findAllByOrderByWeeklyRankPointsDesc();
     }
 
-    public String addImageToUser(Long userId,String profileImageUrl){
-       User user =  userRepository.findById(userId).orElse(null);
+    public String addImageToUser(Long userId, String profileImageUrl) {
+        User user = userRepository.findById(userId).orElse(null);
 
-       if(user == null ){
-           return "User not Found";
-       }
+        if (user == null) {
+            return "User not Found";
+        }
 
-       user.setProfileImageUrl(profileImageUrl);
-       userRepository.save(user);
-       return "Profile image URL updated succesfully";
+        user.setProfileImageUrl(profileImageUrl);
+        userRepository.save(user);
+        return "Profile image URL updated succesfully";
     }
 
-    public User updateUser(long userId, Map<String,Object> updateFields) {
+    public User updateUser(long userId, Map<String, Object> updateFields) {
         Optional<User> existingUserOptional = userRepository.findById(userId);
 
-        if(existingUserOptional.isPresent()){
-           updateFields.forEach((key, value) -> {
-               Field field = ReflectionUtils.findField(User.class, key);
-               field.setAccessible(true);
-               ReflectionUtils.setField(field, existingUserOptional.get(), value);
-           });
-           return userRepository.save(existingUserOptional.get());
-        }else{
+        if (existingUserOptional.isPresent()) {
+            updateFields.forEach((key, value) -> {
+                Field field = ReflectionUtils.findField(User.class, key);
+                field.setAccessible(true);
+                ReflectionUtils.setField(field, existingUserOptional.get(), value);
+            });
+            return userRepository.save(existingUserOptional.get());
+        } else {
             throw new IllegalArgumentException("User with id: " + userId + "can't be found");
         }
 
     }
 
-    public boolean checkIfUserAdmin(String authHeader){
+    public boolean checkIfUserAdmin(String authHeader) {
         String token = authHeader.substring(7);
-        if(!jwtService.extractRole(token).equals("ADMIN")){
+        if (!jwtService.extractRole(token).equals("ADMIN")) {
             return false;
-        };
+        }
+        ;
         return true;
     }
+
     public List<User> getUserBySearchEmail(String email) {
         return userRepository.findUsersBySearchEmail(email);
     }
 
     @Scheduled(fixedRate = 604800000) // 7 days in milliseconds
     public void restWeeklyRanking() {
-        List<User> userList= userRepository.findAll();
+        List<User> userList = userRepository.findAll();
         for (User user : userList) {
             user.setWeeklyRankPoints(0);
             userRepository.save(user);
@@ -291,14 +300,17 @@ public class UserService {
     }
 
     public AuthenticationResponse generateForgotPasswordToken(String email) {
-
         var user = userRepository.findByEmail(email).orElseThrow();
+        String ten_minutes_token = jwtService.generateToken(user, 1000 * 60 * 10);
 
-        //var jwtToken = jwtService.generateToken(user, 1000*60*10);
-        String oneTimePassword = forgotPasswordService.generateForgotPasswordToken(user,10);
-        String subject = "Password Reset Request";
-        String body = "Dear " + user.getFirstName() +" "+ user.getLastName() + ",\n\n"
-                + "You have requested to reset your password. Your one-time password is: " + oneTimePassword + "\n\n"
+//        MUST CHANGE
+        String deploy_link = "https://cleancode-academy.com/reset_CleanCode_password";
+        String local_link = "http://localhost:5173/reset_CleanCode_password";
+        String resetLink = deploy_link + "/" + ten_minutes_token + "/" + user.getId();
+
+        String subject = "CleanCode Password Reset Request";
+        String body = "Dear " + user.getFirstName() + " " + user.getLastName() + ",\n\n"
+                + "You have requested to reset your password. Your one-time link is: \n\n" + resetLink + "\n\n"
                 + "Please use this password to reset your password within the next 10 minutes.\n\n"
                 + "If you did not request this, please ignore this email.\n\n"
                 + "Sincerely,\n"
@@ -306,9 +318,22 @@ public class UserService {
 
         // Send the email
         emailService.sendEmail(user.getEmail(), subject, body);
-        user.setPassword(oneTimePassword);
+
+        return new AuthenticationResponse(resetLink);
+    }
+
+    public AuthenticationResponse resetUserPassword(String password, String authHeader) {
+        String token = authHeader.substring(7);
+        User user = userRepository.findByEmail(jwtService.extractUsername(token)).orElse(null);
+
+        if (user == null) {
+            return new AuthenticationResponse("No user found from token / Token expired");
+        }
+
+        String new_password = passwordEncoder.encode(password);
+        user.setPassword((new_password));
         userRepository.save(user);
 
-        return new AuthenticationResponse(oneTimePassword);
+        return new AuthenticationResponse("Password reseted successfully");
     }
 }

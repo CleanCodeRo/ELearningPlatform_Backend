@@ -49,8 +49,13 @@ public class UserController {
     }
 
     @GetMapping("/auth/forgotPassword/{email}")
-    public ResponseEntity<AuthenticationResponse> forgotPassword(@PathVariable String email ){
+    public ResponseEntity<AuthenticationResponse> forgotPasswordRequest(@PathVariable String email ){
         return ResponseEntity.ok(userService.generateForgotPasswordToken(email));
+    }
+
+    @PatchMapping("/reset_CleanCode_password")
+    public ResponseEntity<AuthenticationResponse> resetUserPassword(@RequestBody Map<String, String> requestBody, @RequestHeader("Authorization") String authHeader ){
+        return ResponseEntity.ok(userService.resetUserPassword( requestBody.get("password"), authHeader));
     }
 
 

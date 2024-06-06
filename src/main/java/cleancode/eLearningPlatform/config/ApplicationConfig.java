@@ -52,7 +52,8 @@ public class ApplicationConfig {
                                         "https://elearning-platform-9a6fa.firebaseapp.com",
                                         "http://localhost:5173",
                                         "https://quest.cleancode.ro",
-                                        "http://quest.cleancode.ro")
+                                        "http://quest.cleancode.ro",
+                                        "https://elearning.cleancode.site")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                         .allowedHeaders("*");
             }

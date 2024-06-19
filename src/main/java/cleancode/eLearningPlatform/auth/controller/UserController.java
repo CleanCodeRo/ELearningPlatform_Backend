@@ -33,6 +33,21 @@ public class UserController {
         return ResponseEntity.ok(userService.getCompletedItems(userId));
     }
 
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<User>> getUsers(){
+        return ResponseEntity.ok(userService.findAllByOrderByRankPoints());
+    }
+
+    @GetMapping("/leaderboard/allTime")
+    public ResponseEntity<List<User>> getUsersWeekly(){
+        return ResponseEntity.ok(userService.findAllByOrderByWeeklyRankPoints());
+    }
+
+    @GetMapping("/auth/forgotPassword/{email}")
+    public ResponseEntity<AuthenticationResponse> forgotPasswordRequest(@PathVariable String email ){
+        return ResponseEntity.ok(userService.generateForgotPasswordToken(email));
+    }
+
     @PostMapping("/auth/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest registerRequest){
         return ResponseEntity.ok(userService.register(registerRequest));
@@ -48,37 +63,23 @@ public class UserController {
         return ResponseEntity.ok(userService.authenticate(authenticationRequest));
     }
 
-    @GetMapping("/auth/forgotPassword/{email}")
-    public ResponseEntity<AuthenticationResponse> forgotPasswordRequest(@PathVariable String email ){
-        return ResponseEntity.ok(userService.generateForgotPasswordToken(email));
-    }
 
     @PatchMapping("/reset_CleanCode_password")
     public ResponseEntity<AuthenticationResponse> resetUserPassword(@RequestBody Map<String, String> requestBody, @RequestHeader("Authorization") String authHeader ){
         return ResponseEntity.ok(userService.resetUserPassword( requestBody.get("password"), authHeader));
     }
 
-
-
     @PatchMapping()
     public ResponseEntity<Response> addOrRemoveLessonFromUser(@RequestParam (name = "userId") Long userId, @RequestParam (name = "lessonId") Integer lessonId , @RequestParam (name = "weekId") Integer weekId ,  @RequestBody Status status){
         return ResponseEntity.ok(userService.addOrRemoveLessonFromUser(userId, lessonId,weekId, status));
     }
 
-    @GetMapping("/leaderboard")
-    public ResponseEntity<List<User>> getUsers(){
-        return ResponseEntity.ok(userService.findAllByOrderByRankPoints());
-    }
-    @GetMapping("/leaderboard/allTime")
-    public ResponseEntity<List<User>> getUsersWeekly(){
-        return ResponseEntity.ok(userService.findAllByOrderByWeeklyRankPoints());
-    }
 
     @PostMapping("/addimage")
     public ResponseEntity<String> addNewImage(@RequestParam(name="userId") Long userId,
                                               @RequestParam(name="profileImageUrl") String profileImageUrl) {
-        System.out.println(userId);
-        System.out.println(profileImageUrl);
+//        System.out.println(userId);
+//        System.out.println(profileImageUrl);
         String result = userService.addImageToUser(userId, profileImageUrl);
             return ResponseEntity.ok(result);
     }

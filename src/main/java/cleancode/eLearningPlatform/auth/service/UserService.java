@@ -48,7 +48,7 @@ public class UserService {
                 .lastName(registerRequest.getLastName())
                 .email(registerRequest.getEmail())
                 .password(passwordEncoder.encode(registerRequest.getPassword()))
-                .role(Role.USER)
+                .role(registerRequest.isAdmin() ? Role.ADMIN : Role.USER)
                 .build();
 
 

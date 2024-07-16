@@ -281,7 +281,6 @@ public class UserService {
         if (!jwtService.extractRole(token).equals("ADMIN")) {
             return false;
         }
-        ;
         return true;
     }
 

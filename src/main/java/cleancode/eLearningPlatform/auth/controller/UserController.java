@@ -74,7 +74,6 @@ public class UserController {
         return ResponseEntity.ok(userService.addOrRemoveLessonFromUser(userId, lessonId,weekId, status));
     }
 
-
     @PostMapping("/addimage")
     public ResponseEntity<String> addNewImage(@RequestParam(name="userId") Long userId,
                                               @RequestParam(name="profileImageUrl") String profileImageUrl) {

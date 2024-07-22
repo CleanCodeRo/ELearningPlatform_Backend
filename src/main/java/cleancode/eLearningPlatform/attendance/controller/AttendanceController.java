@@ -3,21 +3,14 @@ package cleancode.eLearningPlatform.attendance.controller;
 import cleancode.eLearningPlatform.attendance.model.Attendance;
 import cleancode.eLearningPlatform.attendance.model.AttendanceStatus;
 import cleancode.eLearningPlatform.attendance.service.AttendanceService;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,16 +29,17 @@ public class AttendanceController {
         Pageable pageable = PageRequest.of(pageNumber, numberOfItems);
         List<Attendance> attendanceList = attendanceService.getAttendanceList(pageable, startDate, endDate, username.equals("") ? "" : username);
 
-        if (attendanceList.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        } else {
-            return ResponseEntity.ok(attendanceList);
-        }
+        return ResponseEntity.ok(attendanceList);
+
     }
 
-    @GetMapping("/attendanceValues")
-    public ResponseEntity<List<AttendanceStatus>> getAttendanceValues() {
-        return ResponseEntity.ok(Arrays.asList(AttendanceStatus.values()));
+    @GetMapping("/values")
+    public ResponseEntity<Map<AttendanceStatus, String>> getAttendanceValues() {
+        List<AttendanceStatus> statuses = Arrays.asList(AttendanceStatus.values());
+        Map<AttendanceStatus, String> result = new LinkedHashMap<>();
+
+        statuses.stream().forEach(status -> result.put(status, status.getDefaultColor()) );
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping()
@@ -65,7 +59,7 @@ public class AttendanceController {
     ) {
         try{
             Attendance attendance = attendanceService.modifyAttendanceStatus(attendanceId, attendanceStatus);
-            return ResponseEntity.ok( attendance);
+            return ResponseEntity.ok(attendance);
         }catch (RuntimeException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }

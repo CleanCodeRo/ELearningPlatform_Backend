@@ -13,5 +13,4 @@ public class ELearningPlatformApplication {
 		SpringApplication.run(ELearningPlatformApplication.class, args);
 
 	}
-
 }

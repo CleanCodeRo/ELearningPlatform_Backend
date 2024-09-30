@@ -16,7 +16,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
     @Query("SELECT a FROM Attendance a " +
             "WHERE (cast(:startDate as date) is null OR a.date >= :startDate) " +
             "AND (cast(:endDate as date) is null OR a.date <= :endDate) " +
-            "AND (:username IS NULL OR :username = '' OR lower(a.username) LIKE lower(concat('%', :username, '%')))")
+            "AND (:username IS NULL OR :username = '' OR lower(CONCAT(COALESCE(a.user.firstName, ''), ' ', COALESCE(a.user.lastName, ''))) LIKE lower(concat('%', :username, '%')))")
     List<Attendance> getAttendanceList(
             Pageable pageable,
             @Param("startDate") LocalDate startDate,

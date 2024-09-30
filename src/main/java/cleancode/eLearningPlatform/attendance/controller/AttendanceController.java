@@ -27,10 +27,9 @@ public class AttendanceController {
             @RequestParam(name = "numberOfItems") int numberOfItems
     ) {
         Pageable pageable = PageRequest.of(pageNumber, numberOfItems);
-        List<Attendance> attendanceList = attendanceService.getAttendanceList(pageable, startDate, endDate, username.equals("") ? "" : username);
+        List<Attendance> attendanceList = attendanceService.getAttendanceList(pageable, startDate, endDate, username);
 
         return ResponseEntity.ok(attendanceList);
-
     }
 
     @GetMapping("/values")
@@ -50,6 +49,11 @@ public class AttendanceController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
+    }
+
+    @PostMapping("/populate/{days}")
+    public ResponseEntity<?> saveAttendance(@PathVariable int days) {
+       return ResponseEntity.ok(attendanceService.populateAttendance(days));
     }
 
     @PatchMapping("/changeStatus")

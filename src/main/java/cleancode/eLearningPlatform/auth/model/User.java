@@ -26,10 +26,15 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
+
+    @JsonView(UserViews.Summary.class)
     private String firstName;
+
+    @JsonView(UserViews.Summary.class)
     private String lastName;
 
     @Column(unique = true)
+    @JsonView(UserViews.Summary.class)
     private String email;
 
     @JsonIgnore

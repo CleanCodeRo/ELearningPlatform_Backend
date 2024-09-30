@@ -2,14 +2,15 @@ package cleancode.eLearningPlatform.attendance.model;
 
 
 import cleancode.eLearningPlatform.auth.model.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import cleancode.eLearningPlatform.auth.model.UserViews;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(name = "attendance")
@@ -24,18 +25,16 @@ public class Attendance {
     @GeneratedValue
     private long id;
 
-    @JsonBackReference
+    @JsonManagedReference
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonView(UserViews.Summary.class)
     private User user;
 
     @NotNull
     @Temporal(TemporalType.DATE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate date;
-
-    @NotNull
-    private String username;
 
     @NotNull
     @Enumerated(EnumType.STRING)

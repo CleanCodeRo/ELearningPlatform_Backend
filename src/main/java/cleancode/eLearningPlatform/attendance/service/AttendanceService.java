@@ -7,17 +7,37 @@ import cleancode.eLearningPlatform.attendance.repository.AttendanceRepository;
 import cleancode.eLearningPlatform.auth.model.Response;
 import cleancode.eLearningPlatform.auth.model.User;
 import cleancode.eLearningPlatform.auth.repository.UserRepository;
+import cleancode.eLearningPlatform.shared.dto.PageResponseDto;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
+
+    @Transactional
+    @Scheduled(cron = "0 0 0 * * ?")
+    public void createAttendanceForNewDay(){
+       List<User> users = userRepository.findAll();
+       List<Attendance> attendanceForToday = users.stream()
+               .map(user -> Attendance.builder()
+                       .date(LocalDate.now().plusDays(30))
+                       .status(AttendanceStatus.UNMARKED)
+                       .user(user)
+                       .build())
+               .collect(Collectors.toList());
+
+       attendanceRepository.saveAll(attendanceForToday);
+    }
 
     public Attendance saveAttendance(Attendance attendance) {
         if(attendanceRepository.existsByDateAndUserId(attendance.getDate(), attendance.getUser().getId())){
@@ -27,10 +47,9 @@ public class AttendanceService {
         }
     }
 
-    public List<Attendance> getAttendanceList(Pageable pageable, LocalDate startDate, LocalDate endDate, String username) {
-        System.out.println(startDate + " " + endDate + " "  + " Username : " + username);
-
-        return  attendanceRepository.getAttendanceList(pageable, startDate, endDate, username);
+    public PageResponseDto<List<Attendance>> getAttendanceList(Pageable pageable, LocalDate startDate, LocalDate endDate, String username) {
+        Page<Attendance> attendancePage = attendanceRepository.getAttendanceList(pageable, startDate, endDate, username);
+        return new PageResponseDto<>(attendancePage.stream().toList() , attendancePage.getTotalElements(), attendancePage.getNumber(), attendancePage.getTotalPages());
     }
 
     public Attendance modifyAttendanceStatus(Long attendanceId, AttendanceStatus attendanceStatus) {

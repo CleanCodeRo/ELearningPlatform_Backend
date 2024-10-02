@@ -3,7 +3,9 @@ package cleancode.eLearningPlatform.attendance.controller;
 import cleancode.eLearningPlatform.attendance.model.Attendance;
 import cleancode.eLearningPlatform.attendance.model.AttendanceStatus;
 import cleancode.eLearningPlatform.attendance.service.AttendanceService;
+import cleancode.eLearningPlatform.shared.dto.PageResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -19,7 +21,7 @@ public class AttendanceController {
     private final AttendanceService attendanceService;
 
     @GetMapping("/filterBy")
-    public ResponseEntity<List<Attendance>> getAttendanceList(
+    public ResponseEntity<PageResponseDto<List<Attendance>>> getAttendanceList(
             @RequestParam(name = "startDate", required = false) LocalDate startDate,
             @RequestParam(name = "endDate", required = false) LocalDate endDate,
             @RequestParam(name = "username", defaultValue = "") String username,
@@ -27,9 +29,8 @@ public class AttendanceController {
             @RequestParam(name = "numberOfItems") int numberOfItems
     ) {
         Pageable pageable = PageRequest.of(pageNumber, numberOfItems);
-        List<Attendance> attendanceList = attendanceService.getAttendanceList(pageable, startDate, endDate, username);
 
-        return ResponseEntity.ok(attendanceList);
+        return ResponseEntity.ok( attendanceService.getAttendanceList(pageable, startDate, endDate, username));
     }
 
     @GetMapping("/values")

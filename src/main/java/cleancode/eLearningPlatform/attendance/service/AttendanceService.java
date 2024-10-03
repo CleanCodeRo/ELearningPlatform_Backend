@@ -47,8 +47,8 @@ public class AttendanceService {
         }
     }
 
-    public PageResponseDto<List<Attendance>> getAttendanceList(Pageable pageable, LocalDate startDate, LocalDate endDate, String username) {
-        Page<Attendance> attendancePage = attendanceRepository.getAttendanceList(pageable, startDate, endDate, username);
+    public PageResponseDto<List<Attendance>> getAttendanceList(Pageable pageable, LocalDate startDate, LocalDate endDate, String username, Long userId) {
+        Page<Attendance> attendancePage = attendanceRepository.getAttendanceList(pageable, startDate, endDate, username, userId);
         return new PageResponseDto<>(attendancePage.stream().toList() , attendancePage.getTotalElements(), attendancePage.getNumber(), attendancePage.getTotalPages());
     }
 

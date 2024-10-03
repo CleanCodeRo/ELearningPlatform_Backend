@@ -25,12 +25,13 @@ public class AttendanceController {
             @RequestParam(name = "startDate", required = false) LocalDate startDate,
             @RequestParam(name = "endDate", required = false) LocalDate endDate,
             @RequestParam(name = "username", defaultValue = "") String username,
+            @RequestParam(name = "userId", required = false) Long userId,
             @RequestParam(name = "page") int pageNumber,
             @RequestParam(name = "numberOfItems") int numberOfItems
     ) {
         Pageable pageable = PageRequest.of(pageNumber, numberOfItems);
 
-        return ResponseEntity.ok( attendanceService.getAttendanceList(pageable, startDate, endDate, username));
+        return ResponseEntity.ok( attendanceService.getAttendanceList(pageable, startDate, endDate, username, userId));
     }
 
     @GetMapping("/values")

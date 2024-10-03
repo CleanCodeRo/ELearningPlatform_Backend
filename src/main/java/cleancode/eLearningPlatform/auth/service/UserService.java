@@ -33,7 +33,6 @@ public class UserService {
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-    private final ForgotPasswordService forgotPasswordService;
     private final EmailService emailService;
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
@@ -80,17 +79,18 @@ public class UserService {
         return userRepository.findByEmail(jwtService.extractUsername(token)).orElse(null);
     }
 
+    public List<User> getUserBySearchParams(String email, Long id) {
+        return userRepository.findUsersBySearchParams(email, id);
+    }
+
 
     public Response addOrRemoveLessonFromUser(Long userId, Integer lessonId, Integer weekId, Status status) {
         User user = userRepository.findById(userId).orElse(null);
         List<Lesson> lessons = lessonRepository.getRestOfLessons(lessonId);
-        //Lesson currentLesson = lessonRepository.findById(lessonId).orElse(null);
         long completedLessonsBefore = lessons.stream().filter(lesson -> {
             assert user != null;
             return user.getCompletedLessons().contains(lesson.getId());
         }).count();
-
-        // System.out.println(currentLesson.isOptional() + " is OPtionalll ????? ");
 
         assert user != null;
         if (status.equals(Status.DONE)) {
@@ -284,10 +284,6 @@ public class UserService {
         return true;
     }
 
-    public List<User> getUserBySearchEmail(String email) {
-        return userRepository.findUsersBySearchEmail(email);
-    }
-
     @Scheduled(fixedRate = 604800000) // 7 days in milliseconds
     public void restWeeklyRanking() {
         List<User> userList = userRepository.findAll();
@@ -335,4 +331,6 @@ public class UserService {
 
         return new AuthenticationResponse("Password reseted successfully");
     }
+
+
 }

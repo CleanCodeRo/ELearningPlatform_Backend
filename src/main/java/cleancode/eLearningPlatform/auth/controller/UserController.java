@@ -18,14 +18,15 @@ import java.util.Objects;
 public class UserController {
     private final UserService userService;
 
+    @GetMapping()
+    public ResponseEntity<List<User>> getUsers(@RequestParam(name = "email", required = false) String email,
+                                               @RequestParam(name = "id", required = false) Long id){
+        return ResponseEntity.ok(userService.getUserBySearchParams(email, id));
+    }
+
     @GetMapping("/getUserWithToken")
     public ResponseEntity<User> getUserWithToken(@RequestHeader("Authorization") String authHeader){
         return ResponseEntity.ok(userService.getUserWithToken(authHeader));
-    }
-
-    @GetMapping("/{email}")
-    public ResponseEntity<List<User>> getUserBySearchEmail(@PathVariable String email){
-        return ResponseEntity.ok(userService.getUserBySearchEmail(email));
     }
 
     @GetMapping("/{userId}/completedStuff")
@@ -77,8 +78,6 @@ public class UserController {
     @PostMapping("/addimage")
     public ResponseEntity<String> addNewImage(@RequestParam(name="userId") Long userId,
                                               @RequestParam(name="profileImageUrl") String profileImageUrl) {
-//        System.out.println(userId);
-//        System.out.println(profileImageUrl);
         String result = userService.addImageToUser(userId, profileImageUrl);
             return ResponseEntity.ok(result);
     }

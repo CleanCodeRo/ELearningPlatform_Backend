@@ -11,7 +11,6 @@ import cleancode.eLearningPlatform.modulesAndLessons.repository.WeekRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -46,7 +45,6 @@ public class WeekService {
     public Week saveWeek(Week week, String authHeader){
         if(!userService.checkIfUserAdmin(authHeader)) return null;
 
-
         Module module = moduleRepository.findById(week.getModule().getId()).orElse(null);
         System.out.println("Week service, saved week " + week);
         userService.removeModuleFromAllUsers(module, false, new ArrayList<>());
@@ -63,7 +61,7 @@ public class WeekService {
 
         userService.removeWeekFromAllUsers(deletedWeek, false, false ,users);
         weekRepository.delete(deletedWeek);
-        System.out.println("DELETE WEEK " + weekId + "_________________________________________________");
+
         return "Deleted Week " +weekId + " Succesfull";
     }
 

@@ -32,7 +32,7 @@ public class LessonService {
     }
 
     public List<Lesson> findLessonByWeekId(int weekId){
-        return lessonRepository.findAllByWeekIdOrderByOptional(weekId);
+        return lessonRepository.findAllByWeekIdOrderByOptionalAscNumberAsc(weekId);
     }
 
 
@@ -63,7 +63,6 @@ public class LessonService {
         lessonRepository.deleteById(lessonId);
         userService.removeLessonFromAllUsers(lessonId, weekId , false ,users);
 
-        System.out.println("DELETE LESSON -> " + lessonId + " ---------------------------------------------");
         return "Deleted Lesson " + lessonId;
     }
 
@@ -76,6 +75,7 @@ public class LessonService {
             Lesson existingLesson = existUpdatedOptional.get();
 
             existingLesson.setName(updatedLesson.getName());
+            existingLesson.setNumber(updatedLesson.getNumber());
             existingLesson.setDescription(updatedLesson.getDescription());
             existingLesson.setGitHubLink(updatedLesson.getGitHubLink());
             existingLesson.setOptional(updatedLesson.isOptional());

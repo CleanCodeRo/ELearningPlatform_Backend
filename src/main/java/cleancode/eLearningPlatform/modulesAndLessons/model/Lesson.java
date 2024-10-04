@@ -1,9 +1,9 @@
 package cleancode.eLearningPlatform.modulesAndLessons.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
@@ -16,6 +16,9 @@ public class Lesson {
     @GeneratedValue
     private int id;
     private String name;
+
+    @Nullable
+    private Integer number;
 
     @Column(length = 1000)
     private String description;

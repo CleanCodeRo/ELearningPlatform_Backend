@@ -11,6 +11,7 @@ import cleancode.eLearningPlatform.modulesAndLessons.model.Week;
 import cleancode.eLearningPlatform.modulesAndLessons.repository.LessonRepository;
 import cleancode.eLearningPlatform.modulesAndLessons.repository.WeekRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +35,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+
+    @Value("${FRONTEND_URL}")
+    private String frontendURL;
 
     public AuthenticationResponse register(RegisterRequest registerRequest) {
         boolean emailExists = userRepository.existsByEmail(registerRequest.getEmail());
@@ -299,8 +303,7 @@ public class UserService {
         String ten_minutes_token = jwtService.generateToken(user, 1000 * 60 * 10);
 
 //        MUST CHANGE
-        String deploy_link = "https://quest.cleancode.ro/reset_CleanCode_password";
-        String local_link = "http://localhost:5173/reset_CleanCode_password";
+        String deploy_link = frontendURL + "/reset_CleanCode_password";
         String resetLink = deploy_link + "/" + ten_minutes_token + "/" + user.getId();
 
         String subject = "CleanCode Password Reset Request";

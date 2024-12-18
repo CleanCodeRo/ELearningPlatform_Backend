@@ -1,0 +1,25 @@
+services:
+  e-learning-api:
+    container_name: e-learning-api
+    image: 0li2003/e_learning:2.40
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - MAIL_SMTP_AUTH=${MAIL_SMTP_AUTH}
+      - MAIL_SMTP_STARTTLS_ENABLE=${MAIL_SMTP_STARTTLS_ENABLE}
+      - MAIL_SMTP_HOST=${MAIL_SMTP_HOST}
+      - MAIL_SMTP_PORT=${MAIL_SMTP_PORT}
+      - MAIL_SMTP_SSL_TRUST=${MAIL_SMTP_SSL_TRUST}
+      - EMAIL_SENDER_ADDRESS=${EMAIL_SENDER_ADDRESS}
+      - EMAIL_PASSWORD=${EMAIL_PASSWORD}
+    networks:
+      - e_learning_network
+
+networks:
+  e_learning_network:
+    driver: bridge

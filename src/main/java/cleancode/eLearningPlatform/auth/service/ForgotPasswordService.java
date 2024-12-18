@@ -1,4 +1,5 @@
-package cleancode.eLearningPlatform.auth.model;
+package cleancode.eLearningPlatform.auth.service;
+import cleancode.eLearningPlatform.auth.model.User;
 import cleancode.eLearningPlatform.auth.repository.UserRepository;
 import org.springframework.stereotype.Service;
 

@@ -2,6 +2,7 @@ package cleancode.eLearningPlatform.config;
 
 import cleancode.eLearningPlatform.auth.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +20,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class ApplicationConfig {
     private final UserRepository userRepository;
+    @Value("${FRONTEND_URL}")
+    private String frontendURL;
     @Bean
     public UserDetailsService userDetailsService(){
         return email -> userRepository.findByEmail(email).orElseThrow(() ->new UsernameNotFoundException("User not found"));
@@ -48,12 +51,13 @@ public class ApplicationConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins("https://elearning-platform-9a6fa.web.app",
-                                        "https://elearning-platform-9a6fa.firebaseapp.com",
-                                        "http://localhost:5173",
-                                        "https://quest.cleancode.ro",
-                                        "http://quest.cleancode.ro",
-                                        "https://elearning.cleancode.site")
+//                        .allowedOrigins("https://elearning-platform-9a6fa.web.app",
+//                                        "https://elearning-platform-9a6fa.firebaseapp.com",
+//                                        "http://localhost:5173",
+//                                        "https://quest.cleancode.ro",
+//                                        "http://quest.cleancode.ro",
+//                                        "https://elearning.cleancode.site")
+                        .allowedOrigins(frontendURL)
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                         .allowedHeaders("*");
             }
